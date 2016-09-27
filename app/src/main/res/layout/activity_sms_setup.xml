@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.dekatruong.keepmysim.SmsSetupActivity"
+    android:id="@+id/sms_setupLayout">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Phone Number"
+        android:id="@+id/textViewPhone"
+        app:layout_constraintBottom_toTopOf="@+id/editTextPhone"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:ems="10"
+        android:id="@+id/editTextPhone"
+        android:text="0986432189"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="64dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:text="..."
+        android:layout_width="88dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextPhone"
+        android:id="@+id/buttonPickContact"
+        tools:background="@android:drawable/ic_search_category_default"
+        android:onClick="onClick_buttonPickContact"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="16dp"
+        app:layout_constraintLeft_toRightOf="@+id/editTextPhone"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="SMS Message"
+        android:id="@+id/textViewMessage"
+        app:layout_constraintBottom_toTopOf="@+id/editTextMessage"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/editTextMessage"
+        android:text="Tin nhắn ví dụ"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="64dp"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPhone" />
+
+    <TextView
+        android:text="Sending Schedule"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewTIme"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        app:layout_constraintBottom_toTopOf="@+id/editTextDate"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp" />
+
+    <TextView
+        style="?android:attr/spinnerStyle"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:inputType="datetime"
+        android:ems="10"
+        android:id="@+id/editTextDate"
+        android:onClick="onClick_editTextDate"
+        android:hint="Sending Date"
+        tools:clickable="true"
+        android:contextClickable="false"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="64dp"
+        app:layout_constraintTop_toBottomOf="@+id/editTextMessage" />
+
+    <TextView
+        style="?android:attr/spinnerStyle"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:inputType="time"
+        android:id="@+id/editTextTime"
+        android:onClick="onClick_editTextTime"
+        android:hint="Time"
+        android:layout_marginStart="24dp"
+        app:layout_constraintLeft_toRightOf="@+id/editTextDate"
+        android:layout_marginLeft="24dp"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextDate" />
+
+    <CheckBox
+        android:text="Repeat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkBoxIsRepeat"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/editTextDate" />
+    <!--android:onCheckedChanged="onCheckedChanged_checkBoxIsRepeat"-->
+    <EditText
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextDayNumber"
+        android:hint="days"
+        app:layout_constraintLeft_toRightOf="@+id/checkBoxIsRepeat"
+        android:enabled="false"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        app:layout_constraintTop_toTopOf="@+id/checkBoxIsRepeat" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Now"
+        android:id="@+id/buttonSendNow"
+        android:onClick="onClick_buttonSendNow"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="24dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/checkBoxIsRepeat" />
+
+    <Button
+        android:text="Send At Schedule"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonSendAtTime"
+        android:onClick="onClick_buttonSendAtSchedule"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonSendNow"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toRightOf="@+id/buttonSendNow"
+        android:layout_marginLeft="16dp" />
+
+    <EditText
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextHourNumber"
+        app:layout_constraintLeft_toRightOf="@+id/editTextDayNumber"
+        app:layout_constraintBaseline_toBaselineOf="@+id/editTextDayNumber"
+        android:hint="hours"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:maxLength="2"
+        android:enabled="false" />
+
+    <EditText
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextMinuteNumber"
+        android:hint="minutes"
+        android:maxLength="2"
+        android:enabled="false"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextHourNumber"
+        android:layout_marginStart="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/editTextHourNumber"
+        android:layout_marginLeft="8dp" />
+
+    <Button
+        android:text="Stop"
+        android:layout_width="88dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonStopRepeat"
+        android:onClick="onClick_buttonStopRepeat"
+        app:layout_constraintLeft_toRightOf="@+id/buttonSendAtTime"
+        app:layout_constraintBottom_toBottomOf="@+id/buttonSendAtTime" />
+
+</android.support.constraint.ConstraintLayout>
