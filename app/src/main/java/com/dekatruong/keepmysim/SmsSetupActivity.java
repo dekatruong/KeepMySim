@@ -27,7 +27,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.dekatruong.keepmysim.model.SmsSend;
+import com.dekatruong.keepmysim.dto.SmsSend;
 
 import java.text.DateFormat;
 import java.text.ParseException;

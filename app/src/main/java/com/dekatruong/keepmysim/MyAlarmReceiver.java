@@ -1,15 +1,13 @@
 package com.dekatruong.keepmysim;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.dekatruong.keepmysim.model.SmsSend;
+import com.dekatruong.keepmysim.dto.SmsSend;
 
 public class MyAlarmReceiver extends BroadcastReceiver {
 
@@ -27,6 +25,7 @@ public class MyAlarmReceiver extends BroadcastReceiver {
         //Extras
         String phone = intent.getStringExtra(SmsSend.EXTRA_KEY_PHONE);
         String message = intent.getStringExtra(SmsSend.EXTRA_KEY_MESSAGE);
+
 
         this.sendSms(context, phone, message);
     }
