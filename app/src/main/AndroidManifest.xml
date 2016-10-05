@@ -36,6 +36,10 @@
 
         <receiver
             android:name=".MyAlarmReceiver" ></receiver>
+
+        <receiver
+            android:name=".SmsSendingAlarmReceiver" ></receiver>
+
     </application>
 
 </manifest>

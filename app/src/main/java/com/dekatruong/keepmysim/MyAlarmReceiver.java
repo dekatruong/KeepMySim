@@ -20,8 +20,6 @@ public class MyAlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.i("MyApp", "onReceive - MyAlarmReceiver");
 
-        Toast.makeText(context, "onReceive - MyAlarmReceiver",
-                Toast.LENGTH_SHORT).show();
         //Extras
         String phone = intent.getStringExtra(SmsSend.EXTRA_KEY_PHONE);
         String message = intent.getStringExtra(SmsSend.EXTRA_KEY_MESSAGE);
@@ -38,11 +36,11 @@ public class MyAlarmReceiver extends BroadcastReceiver {
         Log.i("MyApp", log);
 
         // To do: permission problem
-        this.smsManager.sendTextMessage(
-                phone,
-                null,
-                message,
-                null, null);
+//        this.smsManager.sendTextMessage(
+//                phone,
+//                null,
+//                message,
+//                null, null);
 
         Toast.makeText(context, log,
                 Toast.LENGTH_SHORT).show();

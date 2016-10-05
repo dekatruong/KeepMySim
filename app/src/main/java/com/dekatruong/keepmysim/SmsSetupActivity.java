@@ -28,12 +28,17 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.dekatruong.keepmysim.dto.SmsSend;
+import com.dekatruong.keepmysim.dto.SmsSendSchedule;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SmsSetupActivity extends AppCompatActivity {
 
@@ -76,6 +81,9 @@ public class SmsSetupActivity extends AppCompatActivity {
 
     // Temporary
     private PendingIntent repeatAlarmPendingIntent;
+
+    private SmsSendSchedule mSmsSendSchedule;
+
 //    public static class MyDatePickerFragment extends DialogFragment
 //            implements DatePickerDialog.OnDateSetListener {
 //
@@ -399,7 +407,7 @@ public class SmsSetupActivity extends AppCompatActivity {
 
 
     public void onClick_buttonSendAtSchedule(View view) {
-        String log = "Sending Message:" +
+        String log = "Sending Message, GUI Input:" +
                 "\n phone: " + editTextPhone.getText().toString() +
                 "\n message: " + editTextMessage.getText().toString() +
                 "\n date: " + textViewDate.getText().toString() +
@@ -411,17 +419,28 @@ public class SmsSetupActivity extends AppCompatActivity {
         Toast.makeText(this, log,
                 Toast.LENGTH_SHORT).show();
         /////
-        Calendar selected_calendar = null;
         try {
-            selected_calendar = this.getCalendarFromView();
+            Calendar selected_calendar = this.getCalendarFromView();
             //View data
             String phone    = this.editTextPhone.getText().toString();
             String message  = this.editTextMessage.getText().toString();
+            boolean is_repeat = this.checkBoxIsRepeat.isChecked();
 
             //Repeat or not
-            if(this.checkBoxIsRepeat.isChecked()) {
+            if(is_repeat) {
                 long input_interval = this.getMilisFromView();
-                this.sendSMSAtSchedule(selected_calendar, phone, message, input_interval);
+
+                //build SmsSendSchedule. Note: currently, storage in class
+                mSmsSendSchedule = (new SmsSendSchedule())
+                        .setId(REPEAT_ALARM_REQUEST_ID) // temporary
+                        .setSendingCalendar(selected_calendar)
+                        .setRepeating(true)
+                        .setInterval(input_interval)
+                        .setSmsSend(new SmsSend(Arrays.asList(phone, "01646424198"), message));
+
+
+                this.sendSMSAtSchedule(mSmsSendSchedule);
+
             } else {
                 this.sendSMSAtSchedule(selected_calendar, phone, message);
             }
@@ -436,7 +455,16 @@ public class SmsSetupActivity extends AppCompatActivity {
     public void onClick_buttonStopRepeat(View view) {
         Log.i("MyApp", "onClick_buttonStopRepeat");
 
-        alarmMgr.cancel(repeatAlarmPendingIntent);
+        //
+        //Build PendingIntent that match last PendingIntent
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(
+                    this, //this, //the same Context
+                    REPEAT_ALARM_REQUEST_ID, //the same request-code
+                    new Intent(this, SmsSendingAlarmReceiver.class), //the same class
+                    0 //0 //the same flag
+                );
+
+        alarmMgr.cancel(alarmIntent);
     }
 
     private Calendar getCalendarFromView() throws ParseException {
@@ -563,6 +591,35 @@ public class SmsSetupActivity extends AppCompatActivity {
                 alarmIntent);
 
     }
+
+    /**
+     *
+     * @param aSmsSendSchedule
+     */
+    private void sendSMSAtSchedule(SmsSendSchedule aSmsSendSchedule) {
+        //debug
+        //Log.d("MyApp", aSmsSendSchedule.getSmsSend().getRecipientsString());
+
+        //Build Intent that will be sendBroadCast later
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(
+                this,
+                aSmsSendSchedule.getId(), //request_id, Unique each Schedule
+                (new Intent(this, SmsSendingAlarmReceiver.class))
+                        .putExtra(SmsSendSchedule.EXTRA_KEY_SMSSEND, aSmsSendSchedule.getSmsSend()), //Json data,
+                PendingIntent.FLAG_UPDATE_CURRENT); //Note: should use flag that we can update it later
+
+        //Temporary
+        aSmsSendSchedule.setRequestPendingIntent(alarmIntent); //keep to cancel later
+
+        // With setInexactRepeating(), you have to use one of the AlarmManager interval
+        alarmMgr.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                aSmsSendSchedule.getSendingCalendar().getTimeInMillis(),
+                aSmsSendSchedule.getInterval(), //Every x ms
+                alarmIntent);
+
+    }
+
 
     private void sendSmsNow(){
         String log = "Sending Message:\n" +
