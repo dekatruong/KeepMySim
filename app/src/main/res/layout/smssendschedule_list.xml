@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/smssendschedule_list"
-    android:name="com.dekatruong.keepmysim.SmsSendScheduleListFragment"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/smssendschedule_list_swipe_refresh_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
-    android:padding="0dp"
-    app:layoutManager="LinearLayoutManager"
-    tools:context="com.dekatruong.keepmysim.SmsSendScheduleListActivity"
-    tools:listitem="@layout/smssendschedule_list_content" />
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/smssendschedule_list"
+        android:name="com.dekatruong.keepmysim.SmsSendScheduleListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:padding="0dp"
+        app:layoutManager="LinearLayoutManager"
+        tools:context="com.dekatruong.keepmysim.SmsSendScheduleListActivity"
+        tools:listitem="@layout/smssendschedule_list_content" />
+
+</android.support.v4.widget.SwipeRefreshLayout>

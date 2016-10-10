@@ -1,27 +1,29 @@
 package com.dekatruong.keepmysim;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 
 import com.dekatruong.keepmysim.dao.SmsSendScheduleDao;
 import com.dekatruong.keepmysim.dto.SmsSendSchedule;
-import com.dekatruong.keepmysim.dummy.DummyContent;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -40,32 +42,68 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
-    Toolbar toolbar;
-    FloatingActionButton fab;
+    private Toolbar toolbar;
+    private FloatingActionButton fabAdd;
+    private RecyclerView recyclerViewSmsSendScheduleList;
+    private SmsSendScheduleRecyclerViewAdapter mSmsSendScheduleRecyclerViewAdapter;
+    private SwipeRefreshLayout swipeRefreshLayoutSmsSendScheduleList;
+
+
+    //Dependency
+    private SmsSendScheduleDao mSmsSendScheduleDao;
+
+    private AlarmManager alarmMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smssendschedule_list);
 
+        //Dependency
+        mSmsSendScheduleDao = new SmsSendScheduleDao(this);
+        //Service Locator:
+        alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+
+        //View
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(this.getTitle());
         this.setSupportActionBar(toolbar);
 
-        fab = (FloatingActionButton) findViewById(R.id.fabAdd);
+        fabAdd = (FloatingActionButton) findViewById(R.id.fabAdd);
 
-        RecyclerView recyclerView = (RecyclerView)findViewById(R.id.smssendschedule_list);
-        recyclerView.setAdapter(
-                new SmsSendScheduleRecyclerViewAdapter(SmsSendScheduleDao.getAll()));
-
-        //
+        //Detach Screen-size
         if (findViewById(R.id.smssendschedule_detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
+            // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
+            // If this view is present, then the activity should be in two-pane mode.
             mTwoPane = true;
         }
+
+        //SmsSendSchedule List
+        recyclerViewSmsSendScheduleList = (RecyclerView)findViewById(R.id.smssendschedule_list);
+        mSmsSendScheduleRecyclerViewAdapter = new SmsSendScheduleRecyclerViewAdapter(mSmsSendScheduleDao.getAll());
+        recyclerViewSmsSendScheduleList.setAdapter(mSmsSendScheduleRecyclerViewAdapter);
+
+        //
+        swipeRefreshLayoutSmsSendScheduleList =
+                (SwipeRefreshLayout) findViewById(R.id.smssendschedule_list_swipe_refresh_container);
+        swipeRefreshLayoutSmsSendScheduleList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
+
+            /**
+             * Called when a swipe gesture triggers a refresh.
+             */
+            @Override
+            public void onRefresh() {
+                //Load.
+                List<SmsSendSchedule> new_data = SmsSendScheduleListActivity.this.mSmsSendScheduleDao.getAll();
+                //Log.i("MyApp",new_data.toString());
+                //Fill data and notify view
+                SmsSendScheduleListActivity.this.mSmsSendScheduleRecyclerViewAdapter.updateAllData(new_data);
+
+                //Job has done: stop refresh progress.
+                swipeRefreshLayoutSmsSendScheduleList.setRefreshing(false);
+        }
+        });
+
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -84,7 +122,7 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
     public class SmsSendScheduleRecyclerViewAdapter
             extends RecyclerView.Adapter<SmsSendScheduleRecyclerViewAdapter.ViewHolder> {
 
-        private final List<SmsSendSchedule> mValues;
+        private List<SmsSendSchedule> mValues;
 
         public SmsSendScheduleRecyclerViewAdapter(List<SmsSendSchedule> items) {
             this.mValues = items;
@@ -106,13 +144,16 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
             holder.mScheduleView.setText((new SimpleDateFormat("dd/MM/yyyy HH:mm")).format(holder.itemData.getSendingCalendar().getTime()));
             holder.mSmsSendRecipientsView.setText(holder.itemData.getSmsSend().getRecipientsString());
             holder.mSmsSendMessageView.setText(holder.itemData.getSmsSend().getMessage());
+            holder.mIntervalView.setText(String.valueOf(holder.itemData.getInterval()));
+            holder.mSwitchEnableSheduleView.setChecked(SmsSendSchedule.Status.ENABLE == holder.itemData.getStatus());
 
+            //Click to an Item View
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
-                        //arguments.putInt(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestId());
+                        //arguments.putInt(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestCode());
                         arguments.putParcelable(SmsSendScheduleDetailFragment.ARG_ITEM, holder.itemData);
 
                         SmsSendScheduleDetailFragment fragment = new SmsSendScheduleDetailFragment();
@@ -124,10 +165,43 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
                     } else {
                         Context context = v.getContext();
                         Intent intent = new Intent(context, SmsSendScheduleDetailActivity.class);
-                        //intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestId());
+                        //intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestCode());
                         intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM, holder.itemData);
 
                         context.startActivity(intent);
+                    }
+                }
+            });
+
+            //switch Enable/Disable Schedule
+            holder.mSwitchEnableSheduleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    ///Info
+                    int request_code = holder.itemData.getRequestCode();
+
+                    if (isChecked) {
+
+                        Log.i("MyApp","Reset request-code: "+request_code);
+
+                    } else {
+                        Log.i("MyApp","Cancel request-code: "+request_code);
+                        //Build PendingIntent that match last PendingIntent: request-code, receiver-class
+
+                        //Perform cancel
+                        alarmMgr.cancel(
+                                PendingIntent.getBroadcast(
+                                    SmsSendScheduleListActivity.this, //can use any context
+                                    request_code, //IMPORTANT parameter
+                                    new Intent(SmsSendScheduleListActivity.this, //can use any context
+                                            SmsSendingAlarmReceiver.class), //IMPORTANT parameter
+                                    PendingIntent.FLAG_UPDATE_CURRENT //can use any
+                                )
+                            );
+
+                        //Model: update DB
+
+
                     }
                 }
             });
@@ -138,11 +212,24 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
             return mValues.size();
         }
 
+        /**
+         * To do: think about performance problem
+         * @param new_data
+         */
+        public void updateAllData(List<SmsSendSchedule> new_data) {
+            this.mValues = new_data;
+
+            this.notifyDataSetChanged();
+        }
+
         public class ViewHolder extends RecyclerView.ViewHolder {
             public final View mView;
             public final TextView mScheduleView;
             public final TextView mSmsSendRecipientsView;
             public final TextView mSmsSendMessageView;
+            public final TextView mIntervalView;
+            public final Switch mSwitchEnableSheduleView;
+
             //Data
             public SmsSendSchedule itemData;
 
@@ -151,9 +238,11 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
 
                 mView = view;
 
-                mScheduleView = (TextView) view.findViewById(R.id.schedule);
+                mScheduleView = (TextView) view.findViewById(R.id.schedule_content_schedule);
                 mSmsSendRecipientsView = (TextView) view.findViewById(R.id.smssend_recipients);
                 mSmsSendMessageView = (TextView) view.findViewById(R.id.smssend_message);
+                mIntervalView = (TextView) view.findViewById(R.id.schedule_content_interval);
+                mSwitchEnableSheduleView = (Switch)view.findViewById(R.id.schedule_content_switchEnableShedule);
             }
 
             @Override

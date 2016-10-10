@@ -81,6 +81,21 @@ public class SmsSend implements Parcelable {
         return result;
     }
 
+    public SmsSend setRecipientsFromString (String recipients_string){
+        //To do: should replace all space before
+        String[] recipient_array = recipients_string.split(",");
+        this.recipients = Arrays.asList(recipient_array);
+
+        return this;
+    }
+
+    public static List<String> fetchRecipients (String recipients_string){
+        //To do: should replace all space before
+        String[] recipient_array = recipients_string.split(",");
+
+        return Arrays.asList(recipient_array);
+    }
+
     public String getMessage() {
         return message;
     }
@@ -121,5 +136,6 @@ public class SmsSend implements Parcelable {
     public static SmsSend fromJson(String json_string) {
         return SmsSend.gson.fromJson(json_string, SmsSend.class);
     }
+
 
 }

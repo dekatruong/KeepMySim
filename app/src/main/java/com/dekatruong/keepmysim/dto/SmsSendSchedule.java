@@ -27,7 +27,7 @@ public class SmsSendSchedule implements Parcelable {
     private static Gson gson = new Gson();
 
     ///////////////////////////////////////////////////////////////////
-    private int requestId; //as request code, Unique each Schedule Alarm
+    private int requestCode; //as request code, Unique each Schedule Alarm
 
     private Calendar sendingCalendar; //first time if repeating
     //for repeating
@@ -37,6 +37,8 @@ public class SmsSendSchedule implements Parcelable {
 
     private SmsSend smsSend;
 
+    //Runtime properties
+    private short status = Status.ENABLE; //0-has not registered yet , 1-has registered
     private PendingIntent requestPendingIntent; //handle(remove/change) request after request be sent
 
     //////////////////////////////////////////////////////////////
@@ -54,10 +56,10 @@ public class SmsSendSchedule implements Parcelable {
     };
 
     public SmsSendSchedule(Parcel in) {
-        this.requestId = in.readInt();
-        long milis = in.readLong(); //Note: read before because of order
+        this.requestCode = in.readInt();
+        long millis = in.readLong(); //Note: read before because of order
         this.sendingCalendar = new GregorianCalendar(TimeZone.getTimeZone(in.readString()));
-        this.sendingCalendar.setTimeInMillis(milis);
+        this.sendingCalendar.setTimeInMillis(millis);
         this.isRepeating = (in.readByte()==1);
         this.interval = in.readLong();
         this.isExact = (in.readByte()==1);
@@ -72,7 +74,7 @@ public class SmsSendSchedule implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.requestId);
+        dest.writeInt(this.requestCode);
         dest.writeLong(this.sendingCalendar.getTimeInMillis());
         dest.writeString(this.sendingCalendar.getTimeZone().getID());
         dest.writeByte((byte)(this.isRepeating?0b1:0b0));
@@ -87,8 +89,8 @@ public class SmsSendSchedule implements Parcelable {
 
     }
 
-    public SmsSendSchedule(int requestId, Calendar sending_calendar, SmsSend sms_send) {
-        this.requestId = requestId;
+    public SmsSendSchedule(int request_code, Calendar sending_calendar, SmsSend sms_send) {
+        this.requestCode = request_code;
         this.sendingCalendar = sending_calendar;
         this.smsSend = sms_send;
     }
@@ -103,12 +105,12 @@ public class SmsSendSchedule implements Parcelable {
         return this;
     }
 
-    public int getRequestId() {
-        return requestId;
+    public int getRequestCode() {
+        return requestCode;
     }
 
-    public SmsSendSchedule setRequestId(int requestId) {
-        this.requestId = requestId;
+    public SmsSendSchedule setRequestCode(int requestCode) {
+        this.requestCode = requestCode;
 
         return this;
     }
@@ -147,8 +149,10 @@ public class SmsSendSchedule implements Parcelable {
         return isExact;
     }
 
-    public void setExact(boolean exact) {
+    public SmsSendSchedule setExact(boolean exact) {
         isExact = exact;
+
+        return this;
     }
 
     public PendingIntent getRequestPendingIntent() {
@@ -169,5 +173,20 @@ public class SmsSendSchedule implements Parcelable {
 
     public String getSendingCalendarStringByFormat(String format) {
         return (new SimpleDateFormat(format)).format(this.sendingCalendar.getTime());
+    }
+
+    public short getStatus() {
+        return status;
+    }
+
+    public SmsSendSchedule setStatus(short status) {
+        this.status = status;
+
+        return this;
+    }
+
+    public static class Status {
+        public static final short DISABLE = 0;
+        public static final short ENABLE = 1;
     }
 }

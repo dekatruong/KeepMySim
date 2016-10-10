@@ -1,6 +1,7 @@
 package com.dekatruong.keepmysim.dao;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -11,7 +12,7 @@ import android.provider.BaseColumns;
 
 public class MainDbHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 4;
 
     public static final String DATABASE_NAME = "Main";
     public static final String DATABASE_FILE_NAME = "Main.db";
@@ -29,9 +30,11 @@ public class MainDbHelper extends SQLiteOpenHelper {
                 SmsSendScheduleEntry.COLUMN_REQUESTID + " BIGINT,"+
                 SmsSendScheduleEntry.COLUMN_SENDING_CALENDAR_MILLIS + " BIGINT," +
                 SmsSendScheduleEntry.COLUMN_IS_REPEATING + " INTEGER(1)," +
+                SmsSendScheduleEntry.COLUMN_INTERVAL + " INTEGER(8)," +
                 SmsSendScheduleEntry.COLUMN_IS_EXACT + " INTEGER(1)," +
                 SmsSendScheduleEntry.COLUMN_SMSSEND_MESSAGE + " TEXT," +
                 SmsSendScheduleEntry.COLUMN_SMSSEND_RECIPIENTS + " TEXT," +
+                SmsSendScheduleEntry.COLUMN_STATUS + " INTEGER(2)" +
                 ")"
         );
         //User
@@ -62,6 +65,10 @@ public class MainDbHelper extends SQLiteOpenHelper {
         public static final String COLUMN_IS_EXACT = "is_exact";
         public static final String COLUMN_SMSSEND_MESSAGE = "smssend_message";
         public static final String COLUMN_SMSSEND_RECIPIENTS = "smssend_recipients";
+        public static final String COLUMN_STATUS = "status";
+
+
+
     }
 
     /* Inner class that defines the table contents */

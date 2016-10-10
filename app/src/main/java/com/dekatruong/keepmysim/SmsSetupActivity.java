@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -433,7 +434,7 @@ public class SmsSetupActivity extends AppCompatActivity {
 
             //build SmsSendSchedule. Note: currently, storage in class
             mSmsSendSchedule = (new SmsSendSchedule())
-                    .setRequestId(REPEAT_ALARM_REQUEST_ID) // temporary
+                    .setRequestCode(REPEAT_ALARM_REQUEST_ID) // temporary
                     .setSendingCalendar(selected_calendar)
                     .setRepeating(is_repeat) //Repeat or not
                     .setInterval(input_interval)
@@ -442,8 +443,8 @@ public class SmsSetupActivity extends AppCompatActivity {
             //Register
             this.sendSMSAtSchedule(mSmsSendSchedule);
 
-            //Storge
-            this.mSmsSendScheduleDao.save(mSmsSendSchedule);
+            //Storage
+            this.mSmsSendScheduleDao.create(mSmsSendSchedule);
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -599,7 +600,7 @@ public class SmsSetupActivity extends AppCompatActivity {
         //Build Intent that will be sendBroadCast later
         PendingIntent alarmIntent = PendingIntent.getBroadcast(
                 this,
-                aSmsSendSchedule.getRequestId(), //request_id, Unique each Schedule
+                aSmsSendSchedule.getRequestCode(), //request_id, Unique each Schedule
                 (new Intent(this, SmsSendingAlarmReceiver.class))
                         .putExtra(SmsSendSchedule.EXTRA_KEY_SMSSEND, aSmsSendSchedule.getSmsSend()), //Json data,
                 PendingIntent.FLAG_UPDATE_CURRENT); //Note: should use flag that we can update it later
@@ -607,18 +608,40 @@ public class SmsSetupActivity extends AppCompatActivity {
         //Temporary
         aSmsSendSchedule.setRequestPendingIntent(alarmIntent); //keep to cancel later
 
-        if (aSmsSendSchedule.isRepeating()) {
+        if (aSmsSendSchedule.isRepeating() && aSmsSendSchedule.isExact()) {
             // With setInexactRepeating(), you have to use one of the AlarmManager interval
             alarmMgr.setRepeating(
                     AlarmManager.RTC_WAKEUP,
                     aSmsSendSchedule.getSendingCalendar().getTimeInMillis(),
                     aSmsSendSchedule.getInterval(), //Every x ms
                     alarmIntent);
-        } else {
+        }
+        else if (aSmsSendSchedule.isRepeating() && !aSmsSendSchedule.isExact() ) {
+            alarmMgr.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    aSmsSendSchedule.getSendingCalendar().getTimeInMillis(),
+                    aSmsSendSchedule.getInterval(), //Every x ms
+                    alarmIntent);
+        }
+        else if (!aSmsSendSchedule.isRepeating() && !aSmsSendSchedule.isExact() ) {
             alarmMgr.set(
                     AlarmManager.RTC_WAKEUP,
                     aSmsSendSchedule.getSendingCalendar().getTimeInMillis(),
                     alarmIntent);
+        }
+        else if (!aSmsSendSchedule.isRepeating() && aSmsSendSchedule.isExact() ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                alarmMgr.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        aSmsSendSchedule.getSendingCalendar().getTimeInMillis(),
+                        alarmIntent);
+            } else {
+                //Not support Api level: use inexact instead
+                alarmMgr.set(
+                        AlarmManager.RTC_WAKEUP,
+                        aSmsSendSchedule.getSendingCalendar().getTimeInMillis(),
+                        alarmIntent);
+            }
         }
 
     }
