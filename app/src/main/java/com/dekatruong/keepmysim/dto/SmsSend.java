@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +32,11 @@ public class SmsSend implements Parcelable {
     public SmsSend(List<String> recipients, String message){
         this.message = message;
         this.getRecipients().addAll(recipients);
+    }
+
+    public SmsSend(String message, String... recipients){
+        this.message = message;
+        this.getRecipients().addAll(Arrays.asList(recipients));
     }
 
     //////////////////////////////////////////////////////

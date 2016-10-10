@@ -6,7 +6,7 @@ import android.os.Parcelable;
 
 import com.google.gson.Gson;
 
-import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -27,7 +27,7 @@ public class SmsSendSchedule implements Parcelable {
     private static Gson gson = new Gson();
 
     ///////////////////////////////////////////////////////////////////
-    private int id; //as request code, Unique each Schedule Alarm
+    private int requestId; //as request code, Unique each Schedule Alarm
 
     private Calendar sendingCalendar; //first time if repeating
     //for repeating
@@ -54,7 +54,7 @@ public class SmsSendSchedule implements Parcelable {
     };
 
     public SmsSendSchedule(Parcel in) {
-        this.id = in.readInt();
+        this.requestId = in.readInt();
         long milis = in.readLong(); //Note: read before because of order
         this.sendingCalendar = new GregorianCalendar(TimeZone.getTimeZone(in.readString()));
         this.sendingCalendar.setTimeInMillis(milis);
@@ -72,7 +72,7 @@ public class SmsSendSchedule implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.id);
+        dest.writeInt(this.requestId);
         dest.writeLong(this.sendingCalendar.getTimeInMillis());
         dest.writeString(this.sendingCalendar.getTimeZone().getID());
         dest.writeByte((byte)(this.isRepeating?0b1:0b0));
@@ -87,6 +87,12 @@ public class SmsSendSchedule implements Parcelable {
 
     }
 
+    public SmsSendSchedule(int requestId, Calendar sending_calendar, SmsSend sms_send) {
+        this.requestId = requestId;
+        this.sendingCalendar = sending_calendar;
+        this.smsSend = sms_send;
+    }
+
     public SmsSend getSmsSend() {
         return smsSend;
     }
@@ -97,12 +103,12 @@ public class SmsSendSchedule implements Parcelable {
         return this;
     }
 
-    public int getId() {
-        return id;
+    public int getRequestId() {
+        return requestId;
     }
 
-    public SmsSendSchedule setId(int id) {
-        this.id = id;
+    public SmsSendSchedule setRequestId(int requestId) {
+        this.requestId = requestId;
 
         return this;
     }
@@ -161,4 +167,7 @@ public class SmsSendSchedule implements Parcelable {
         return SmsSendSchedule.gson.fromJson(json_string, SmsSendSchedule.class);
     }
 
+    public String getSendingCalendarStringByFormat(String format) {
+        return (new SimpleDateFormat(format)).format(this.sendingCalendar.getTime());
+    }
 }

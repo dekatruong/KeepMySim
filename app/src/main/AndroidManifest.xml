@@ -13,33 +13,31 @@
         android:theme="@style/AppTheme">
         <activity android:name=".SmsSetupActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.SENDTO" />
             </intent-filter>
-            <!--  -->
-            <!-- filter for sending text; accepts SENDTO action with sms URI schemes -->
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.SENDTO"/> -->
-            <!-- <category android:name="android.intent.category.DEFAULT"/> -->
-            <!-- <data android:scheme="sms" /> -->
-            <!-- <data android:scheme="smsto" /> -->
-            <!-- </intent-filter> -->
-            <!-- &lt;!&ndash; filter for sending text or images; accepts SEND action and text or image data &ndash;&gt; -->
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.SEND"/> -->
-            <!-- <category android:name="android.intent.category.DEFAULT"/> -->
-            <!-- <data android:mimeType="image/*"/> -->
-            <!-- <data android:mimeType="text/plain"/> -->
-            <!-- </intent-filter> -->
         </activity>
 
-        <receiver
-            android:name=".MyAlarmReceiver" ></receiver>
+        <receiver android:name=".MyAlarmReceiver" />
+        <receiver android:name=".SmsSendingAlarmReceiver" />
 
-        <receiver
-            android:name=".SmsSendingAlarmReceiver" ></receiver>
-
+        <activity
+            android:name=".SmsSendScheduleListActivity"
+            android:label="@string/title_smssendschedule_list"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SmsSendScheduleDetailActivity"
+            android:label="@string/title_smssendschedule_detail"
+            android:parentActivityName=".SmsSendScheduleListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.dekatruong.keepmysim.SmsSendScheduleListActivity" />
+        </activity>
     </application>
 
 </manifest>

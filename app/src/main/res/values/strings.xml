@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Keep My Sim</string>
+    <string name="title_smssendschedule_list">SmsSendSchedules</string>
+    <string name="title_smssendschedule_detail">SmsSendSchedule Detail</string>
 </resources>
