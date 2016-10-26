@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.dekatruong.keepmysim.dao.SmsSendScheduleDao;
 import com.dekatruong.keepmysim.dto.SmsSend;
 import com.dekatruong.keepmysim.dto.SmsSendSchedule;
+import com.dekatruong.keepmysim.tool.SmsSendScheduleBuilder;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -433,8 +434,9 @@ public class SmsSetupActivity extends AppCompatActivity {
             long input_interval = this.getMilisFromView();
 
             //build SmsSendSchedule. Note: currently, storage in class
-            mSmsSendSchedule = (new SmsSendSchedule())
-                    .setRequestCode(REPEAT_ALARM_REQUEST_ID) // temporary
+            mSmsSendSchedule = new SmsSendScheduleBuilder(this)
+                    .generateRequestCode() //generate request-code
+                    .build()
                     .setSendingCalendar(selected_calendar)
                     .setRepeating(is_repeat) //Repeat or not
                     .setInterval(input_interval)
@@ -596,6 +598,7 @@ public class SmsSetupActivity extends AppCompatActivity {
     private void sendSMSAtSchedule(SmsSendSchedule aSmsSendSchedule) {
         //debug
         //Log.d("MyApp", aSmsSendSchedule.getSmsSend().getRecipientsString());
+        Log.i("MyApp", "request-code: "+aSmsSendSchedule.getRequestCode());
 
         //Build Intent that will be sendBroadCast later
         PendingIntent alarmIntent = PendingIntent.getBroadcast(

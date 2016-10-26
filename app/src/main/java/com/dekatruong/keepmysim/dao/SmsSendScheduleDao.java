@@ -50,7 +50,7 @@ public class SmsSendScheduleDao extends MainDbBaseDao {
         // Insert the new row, returning the primary key value of the new row
         long newRowId = writableDbConnection.insert(SmsSendScheduleEntry.TABLE_NAME, null, values);
 
-        Log.i("MyApp-DAO", "create - new id: "+newRowId);
+        Log.i("MyApp-DAO", "create - new record id: "+newRowId);
 
         //Release connection
         writableDbConnection.close();
@@ -84,6 +84,8 @@ public class SmsSendScheduleDao extends MainDbBaseDao {
     public List<SmsSendSchedule> getAll() {
         SQLiteDatabase db = mDbHelper.getReadableDatabase(); //To do: connect once in init
 
+        String sortOrder = SmsSendScheduleEntry._ID + " DESC";
+
         //Execute query
         Cursor cursor = db.query(
                 SmsSendScheduleEntry.TABLE_NAME,                     // The table to query
@@ -92,7 +94,7 @@ public class SmsSendScheduleDao extends MainDbBaseDao {
                 null,                            // The values for the WHERE clause
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
-                null                                 // The sort order
+                sortOrder                                 // The sort order
         );
 
         //Fetch

@@ -25,17 +25,28 @@ public class SmsSendScheduleBuilder {
     SharedPreferences sharedPref;
     SharedPreferences.Editor mSharedPrefEditor;
 
+
+    public SmsSendScheduleBuilder(Context context) {
+        this.sharedPref = context.getSharedPreferences( SMSSEND_SHEDULE_PREF, Context.MODE_PRIVATE);
+        this.mSharedPrefEditor = sharedPref.edit();
+
+        nextRequestCode.set(sharedPref.getInt(NEXT_REQUEST_CODE_KEY, 1)); //Load From storage
+
+        mSmsSendSchedule = new SmsSendSchedule();
+    }
+
+
     public SmsSendScheduleBuilder(Context context, Calendar sending_calendar, SmsSend sms_send) {
         this.sharedPref = context.getSharedPreferences( SMSSEND_SHEDULE_PREF, Context.MODE_PRIVATE);
         this.mSharedPrefEditor = sharedPref.edit();
 
         nextRequestCode.set(sharedPref.getInt(NEXT_REQUEST_CODE_KEY, 1)); //Load From storage
 
-        mSmsSendSchedule = new SmsSendSchedule(nextRequestCode.get(), sending_calendar, sms_send);
+        mSmsSendSchedule = new SmsSendSchedule(0, sending_calendar, sms_send); //dont set nextRequestCode
     }
 
 
-    public SmsSendScheduleBuilder generateRequestCode(Context context) {
+    public SmsSendScheduleBuilder generateRequestCode() {
         int next_request_code = this.getAndIncrementAndStorgeNextRequestCode();
 
         mSmsSendSchedule.setRequestCode(next_request_code); //To dto
@@ -43,9 +54,21 @@ public class SmsSendScheduleBuilder {
         return this;
     }
 
-    public SmsSendSchedule build() {
-        this.getAndIncrementAndStorgeNextRequestCode(); //increase 1
+    public SmsSendScheduleBuilder generateRequestCode(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(SMSSEND_SHEDULE_PREF, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
 
+        //get an increase
+        int next_request_code = this.nextRequestCode.get(); //To do: care with asyn task
+        editor.putInt(NEXT_REQUEST_CODE_KEY, this.nextRequestCode.incrementAndGet());
+        editor.commit();
+        //
+        mSmsSendSchedule.setRequestCode(next_request_code); //To dto
+
+        return this;
+    }
+
+    public SmsSendSchedule build() {
         return mSmsSendSchedule;
     }
 
