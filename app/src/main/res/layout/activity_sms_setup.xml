@@ -34,8 +34,8 @@
 
     <Button
         android:text="..."
-        android:layout_width="88dp"
-        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/editTextPhone"
         android:id="@+id/buttonPickContact"
         tools:background="@android:drawable/ic_search_category_default"
@@ -134,8 +134,8 @@
         android:hint="days"
         app:layout_constraintLeft_toRightOf="@+id/checkBoxIsRepeat"
         android:enabled="false"
-        android:layout_marginStart="24dp"
-        android:layout_marginLeft="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
         app:layout_constraintTop_toTopOf="@+id/checkBoxIsRepeat" />
 
     <Button
@@ -178,7 +178,7 @@
         android:enabled="false" />
 
     <EditText
-        android:layout_width="80dp"
+        android:layout_width="74dp"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
@@ -190,14 +190,5 @@
         android:layout_marginStart="8dp"
         app:layout_constraintLeft_toRightOf="@+id/editTextHourNumber"
         android:layout_marginLeft="8dp" />
-
-    <Button
-        android:text="Stop"
-        android:layout_width="88dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/buttonStopRepeat"
-        android:onClick="onClick_buttonStopRepeat"
-        app:layout_constraintLeft_toRightOf="@+id/buttonSendAtTime"
-        app:layout_constraintBottom_toBottomOf="@+id/buttonSendAtTime" />
 
 </android.support.constraint.ConstraintLayout>

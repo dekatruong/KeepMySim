@@ -157,11 +157,23 @@ public class SmsSendScheduleDao extends MainDbBaseDao {
         return rs;
     }
 
+
+    public int deleteByRequestCode(int request_code) {
+        // Gets the data repository in write mode
+        SQLiteDatabase writableDbConnection = mDbHelper.getWritableDatabase(); //To do: connect once in init
+
+        // Issue SQL statement.
+        return writableDbConnection.delete(SmsSendScheduleEntry.TABLE_NAME,
+                SmsSendScheduleEntry.COLUMN_REQUESTID + " = ?",
+                new String[] { String.valueOf(request_code) });
+    }
+
     public static SmsSendSchedule getById(int id) {
         return FAKE_DATA.get(id);
     }
 
-    public static SmsSendSchedule getByRequetId(int request_id) {
-        return FAKE_DATA.get(request_id);
+    public static SmsSendSchedule getByRequestCode(int request_code) {
+        return FAKE_DATA.get(request_code);
     }
+
 }

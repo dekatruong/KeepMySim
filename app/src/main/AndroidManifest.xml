@@ -11,13 +11,15 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SmsSetupActivity">
+
+        <activity
+            android:name=".SmsSetupActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SENDTO" />
             </intent-filter>
         </activity>
 
-        <receiver android:name=".MyAlarmReceiver" />
         <receiver android:name=".SmsSendingAlarmReceiver" />
 
         <activity
@@ -29,6 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SmsSendScheduleDetailActivity"
             android:label="@string/title_smssendschedule_detail"

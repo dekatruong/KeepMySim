@@ -501,95 +501,12 @@ public class SmsSetupActivity extends AppCompatActivity {
         int hour = ("".equals(h)) ? 0 : Integer.parseInt(h);
         int day = ("".equals(d)) ? 0 : Integer.parseInt(d);
 
-        Log.i("MyApp", day + " days " + hour + " hours " + minutes + " minutes ");
+        //Log.i("MyApp", day + " days " + hour + " hours " + minutes + " minutes ");
 
+        //Note: to long-type all
         return minutes * MILIS_PER_MINUTE
                 + hour * MILIS_PER_HOUR
-                + day * MILIS_PER_DAY;
-    }
-
-    /**
-     * @param calendar 1st alarm datetime
-     * @param phone
-     * @param message
-     */
-    private void sendSMSAtSchedule(Calendar calendar, String phone, String message) {
-        Log.i("MyApp", "sendSMSAtSchedule: " + calendar.getTime().toString());
-
-        //Build Intent that will be sendBroadCast later
-        Intent intent = new Intent(this, MyAlarmReceiver.class);
-        intent.putExtra(SmsSend.EXTRA_KEY_PHONE, phone);
-        intent.putExtra(SmsSend.EXTRA_KEY_MESSAGE, message);
-
-        int request_id = (int) System.currentTimeMillis();
-        ; //Unique each Schedule. To do
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(
-                this,
-                request_id, //Unique each unique Schedule
-                intent,
-                0);
-
-        // Set the alarm to start at approximately 2:00 p.m.
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-//        calendar.set(Calendar.HOUR_OF_DAY, 21); //12h
-//        calendar.set(Calendar.MINUTE, 25); //15m
-        //calendar.setTimeZone();
-
-        // With setInexactRepeating(), you have to use one of the AlarmManager interval
-        // constants--in this case, AlarmManager.INTERVAL_DAY.
-//        alarmMgr.setInexactRepeating(
-//                AlarmManager.RTC_WAKEUP,
-//                calendar.getTimeInMillis(),
-//                interval, //Every x ms
-//                alarmIntent);
-
-//        this.alarmMgr.setInexactRepeating(
-//                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-//                SystemClock.elapsedRealtime() + (5 * 1000),
-//                5 * 1000, //5s
-//                alarmIntent);
-
-        alarmMgr.set(
-                AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(),
-                alarmIntent);
-
-    }
-
-    /**
-     * @param calendar 1st alarm datetime
-     * @param phone
-     * @param message
-     */
-    private void sendSMSAtSchedule(Calendar calendar, String phone, String message, long interval) {
-        Log.i("MyApp", "sendSMSAtSchedule: " + calendar.getTime().toString()
-                + "\n interval: " + interval);
-
-        //Build Intent that will be sendBroadCast later
-        Intent intent = new Intent(this, MyAlarmReceiver.class);
-        intent.putExtra(SmsSend.EXTRA_KEY_PHONE, phone);
-        intent.putExtra(SmsSend.EXTRA_KEY_MESSAGE, message);
-
-        //int request_id = (int) System.currentTimeMillis();; //Unique each Schedule. To do
-        int request_id = REPEAT_ALARM_REQUEST_ID; //Temporary, only 1 alarm to control it
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(
-                this,
-                request_id,
-                intent,
-                0);
-
-        //Temporary
-        repeatAlarmPendingIntent = alarmIntent; //keep to cancel later
-
-        // With setInexactRepeating(), you have to use one of the AlarmManager interval
-        // constants--in this case, AlarmManager.INTERVAL_DAY.
-        alarmMgr.setRepeating(
-                AlarmManager.RTC_WAKEUP,
-                calendar.getTimeInMillis(),
-                interval, //Every x ms
-                alarmIntent);
-
+                + (long)day * MILIS_PER_DAY; //can be so large (parse to long before)
     }
 
     /**

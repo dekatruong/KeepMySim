@@ -1,11 +1,13 @@
 package com.dekatruong.keepmysim;
 
+import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -79,11 +81,9 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
         }
 
         //SmsSendSchedule List
-        recyclerViewSmsSendScheduleList = (RecyclerView)findViewById(R.id.smssendschedule_list);
-        mSmsSendScheduleRecyclerViewAdapter = new SmsSendScheduleRecyclerViewAdapter(mSmsSendScheduleDao.getAll());
-        recyclerViewSmsSendScheduleList.setAdapter(mSmsSendScheduleRecyclerViewAdapter);
+       this.setupSmsSendScheduleList();
 
-        //
+        //Refresh data list
         swipeRefreshLayoutSmsSendScheduleList =
                 (SwipeRefreshLayout) findViewById(R.id.smssendschedule_list_swipe_refresh_container);
         swipeRefreshLayoutSmsSendScheduleList.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
@@ -106,10 +106,10 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
 
     }
 
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-
-
-//        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
+    private void setupSmsSendScheduleList() {
+        recyclerViewSmsSendScheduleList = (RecyclerView)findViewById(R.id.smssendschedule_list);
+        mSmsSendScheduleRecyclerViewAdapter = new SmsSendScheduleRecyclerViewAdapter(mSmsSendScheduleDao.getAll());
+        recyclerViewSmsSendScheduleList.setAdapter(mSmsSendScheduleRecyclerViewAdapter);
     }
 
     public void onClick_fabAdd(View view) {
@@ -140,71 +140,19 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
             holder.itemData = this.mValues.get(position);
+
+            //Log.d("MyApp","interval " +holder.itemData.getInterval());
+            //long interval = holder.itemData.getInterval();
+
             //View
             holder.mScheduleView.setText((new SimpleDateFormat("dd/MM/yyyy HH:mm")).format(holder.itemData.getSendingCalendar().getTime()));
             holder.mSmsSendRecipientsView.setText(holder.itemData.getSmsSend().getRecipientsString());
             holder.mSmsSendMessageView.setText(holder.itemData.getSmsSend().getMessage());
             holder.mIntervalView.setText(String.valueOf(holder.itemData.getInterval()));
-            holder.mSwitchEnableSheduleView.setChecked(SmsSendSchedule.Status.ENABLE == holder.itemData.getStatus());
-
-            //Click to an Item View
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mTwoPane) {
-                        Bundle arguments = new Bundle();
-                        //arguments.putInt(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestCode());
-                        arguments.putParcelable(SmsSendScheduleDetailFragment.ARG_ITEM, holder.itemData);
-
-                        SmsSendScheduleDetailFragment fragment = new SmsSendScheduleDetailFragment();
-                        fragment.setArguments(arguments);
-
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.smssendschedule_detail_container, fragment)
-                                .commit();
-                    } else {
-                        Context context = v.getContext();
-                        Intent intent = new Intent(context, SmsSendScheduleDetailActivity.class);
-                        //intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestCode());
-                        intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM, holder.itemData);
-
-                        context.startActivity(intent);
-                    }
-                }
-            });
-
-            //switch Enable/Disable Schedule
-            holder.mSwitchEnableSheduleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    ///Info
-                    int request_code = holder.itemData.getRequestCode();
-
-                    if (isChecked) {
-
-                        Log.i("MyApp","Reset request-code: "+request_code);
-
-                    } else {
-                        Log.i("MyApp","Cancel request-code: "+request_code);
-                        //Build PendingIntent that match last PendingIntent: request-code, receiver-class
-
-                        //Perform cancel
-                        alarmMgr.cancel(
-                                PendingIntent.getBroadcast(
-                                    SmsSendScheduleListActivity.this, //can use any context
-                                    request_code, //IMPORTANT parameter
-                                    new Intent(SmsSendScheduleListActivity.this, //can use any context
-                                            SmsSendingAlarmReceiver.class), //IMPORTANT parameter
-                                    PendingIntent.FLAG_UPDATE_CURRENT //can use any
-                                )
-                            );
-
-                        //Model: update DB
+            holder.mSwitchEnableScheduleView.setChecked(SmsSendSchedule.Status.ENABLE == holder.itemData.getStatus());
 
 
-                    }
-                }
-            });
+
         }
 
         @Override
@@ -228,8 +176,7 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
             public final TextView mSmsSendRecipientsView;
             public final TextView mSmsSendMessageView;
             public final TextView mIntervalView;
-            public final Switch mSwitchEnableSheduleView;
-
+            public final Switch mSwitchEnableScheduleView;
             //Data
             public SmsSendSchedule itemData;
 
@@ -242,7 +189,141 @@ public class SmsSendScheduleListActivity extends AppCompatActivity {
                 mSmsSendRecipientsView = (TextView) view.findViewById(R.id.smssend_recipients);
                 mSmsSendMessageView = (TextView) view.findViewById(R.id.smssend_message);
                 mIntervalView = (TextView) view.findViewById(R.id.schedule_content_interval);
-                mSwitchEnableSheduleView = (Switch)view.findViewById(R.id.schedule_content_switchEnableShedule);
+                mSwitchEnableScheduleView = (Switch)view.findViewById(R.id.schedule_content_switchEnableShedule);
+
+
+                //Click to an Item View
+                this.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (SmsSendScheduleListActivity.this.mTwoPane) {
+                            Log.i("MyApp", "two-pane mode");
+
+                            Bundle arguments = new Bundle();
+                            //arguments.putInt(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestCode());
+                            arguments.putParcelable(SmsSendScheduleDetailFragment.ARG_ITEM, ViewHolder.this.itemData);
+
+                            SmsSendScheduleDetailFragment fragment = new SmsSendScheduleDetailFragment();
+                            fragment.setArguments(arguments);
+
+                            getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.smssendschedule_detail_container, fragment)
+                                    .commit();
+                        } else {
+                            //Log.i("MyApp", "one-pane mode");
+
+                            Context context = v.getContext();
+                            Intent intent = new Intent(context, SmsSendScheduleDetailActivity.class);
+                            //intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM_ID, holder.itemData.getRequestCode());
+                            intent.putExtra(SmsSendScheduleDetailFragment.ARG_ITEM, ViewHolder.this.itemData);
+
+                            context.startActivity(intent);
+                        }
+                    }
+                });
+
+                //long click show action menu
+                this.mView.setOnLongClickListener(new View.OnLongClickListener() {
+
+                    final CharSequence[] MENU_ITEMS = { "Delete", "Edit" };
+                    final Activity context = SmsSendScheduleListActivity.this;
+                    final RecyclerView.Adapter adapter = (RecyclerView.Adapter) SmsSendScheduleListActivity.this
+                            .recyclerViewSmsSendScheduleList.getAdapter();
+
+                    AlertDialog showMenuAlert = new AlertDialog.Builder(context)
+                            //.setTitle("Action:")
+                            .setItems(MENU_ITEMS, new DialogInterface.OnClickListener() {
+
+                                public void onClick(DialogInterface dialog, int item) {
+                                    switch (item) {
+                                        //Delete
+                                        case 0:
+                                            //Sure!
+                                            (new AlertDialog.Builder(context))
+                                                    .setTitle("Success")
+                                                    .setMessage("Remove an Schedule")
+                                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int which) {
+
+                                                        }
+                                                    })
+                                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            int request_code = ViewHolder.this.itemData.getRequestCode();
+                                                            Log.i("MyApp", "delete request-code: " + request_code);
+
+                                                            //Delete from DB
+                                                            mSmsSendScheduleDao.deleteByRequestCode(request_code);
+
+                                                            //Perform cancel
+                                                            Log.i("MyApp","Cancel request-code: "+request_code);
+                                                            alarmMgr.cancel(
+                                                                    PendingIntent.getBroadcast(
+                                                                            SmsSendScheduleListActivity.this, //can use any context
+                                                                            request_code, //IMPORTANT parameter
+                                                                            new Intent(SmsSendScheduleListActivity.this, //can use any context
+                                                                                    SmsSendingAlarmReceiver.class), //IMPORTANT parameter
+                                                                            PendingIntent.FLAG_UPDATE_CURRENT //can use any
+                                                                    )
+                                                            );
+                                                        }
+                                                    })
+                                                    .show();
+                                        //Edit
+                                        case 1:
+                                            //do no thing
+                                    }
+
+                                }
+
+                            })
+                            .create();
+
+                    @Override
+                    public boolean onLongClick(View view) {
+                        Log.i("MyApp", "long click");
+
+                        showMenuAlert.show();
+
+                        //do other stuff here
+
+                        return false;
+                    }
+                });
+
+
+                //switch Enable/Disable Schedule
+                this.mSwitchEnableScheduleView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        ///Info
+                        int request_code = ViewHolder.this.itemData.getRequestCode();
+
+                        if (isChecked) {
+
+                            Log.i("MyApp","Reset request-code: "+request_code);
+
+                        } else {
+                            Log.i("MyApp","Cancel request-code: "+request_code);
+                            //Build PendingIntent that match last PendingIntent: request-code, receiver-class
+
+                            //Perform cancel
+                            alarmMgr.cancel(
+                                    PendingIntent.getBroadcast(
+                                            SmsSendScheduleListActivity.this, //can use any context
+                                            request_code, //IMPORTANT parameter
+                                            new Intent(SmsSendScheduleListActivity.this, //can use any context
+                                                    SmsSendingAlarmReceiver.class), //IMPORTANT parameter
+                                            PendingIntent.FLAG_UPDATE_CURRENT //can use any
+                                    )
+                            );
+
+                            //Model: update DB
+
+
+                        }
+                    }
+                });
             }
 
             @Override
